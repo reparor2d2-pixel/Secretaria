@@ -32,21 +32,28 @@
 </head>
 <body class="min-h-screen p-4 md:p-6">
 
-  <!-- PANTALLA DE BLOQUEO POR PIN INSTITUCIONAL -->
+  <!-- PANTALLA DE CONEXIÓN Y PIN INSTITUCIONAL -->
   <div id="pantallaPin" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="glass-card max-w-sm w-full rounded-2xl p-6 text-center space-y-5 border border-indigo-500/30 shadow-2xl">
+    <div class="glass-card max-w-md w-full rounded-2xl p-6 text-center space-y-5 border border-indigo-500/30 shadow-2xl">
       <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
         <i class="fa-solid fa-shield-halved text-white text-2xl"></i>
       </div>
       <div>
-        <h2 class="text-lg font-bold text-white">Acceso Restringido</h2>
-        <p class="text-xs text-slate-400 mt-1">Coordinación de Convivencia Escolar · Colegio Nuestra Señora de las Mercedes</p>
+        <h2 class="text-lg font-bold text-white">Secretaría Ejecutiva IA</h2>
+        <p class="text-xs text-slate-400 mt-1">Colegio Nuestra Señora de las Mercedes · Coordinación Convivencia Escolar</p>
       </div>
-      <div class="space-y-3">
-        <input type="password" id="inputPin" onkeypress="if(event.key==='Enter') validarAcceso()" placeholder="Ingresa tu PIN institucional" class="w-full text-center tracking-widest bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-        <p id="errorPin" class="hidden text-xs text-rose-400">PIN incorrecto. Intenta nuevamente.</p>
-        <button onclick="validarAcceso()" id="btnIngresar" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium py-3 rounded-xl transition shadow-lg shadow-indigo-600/25">
-          Desbloquear Secretaría IA
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="text-[11px] text-slate-400 ml-1">URL del Backend (Google Apps Script /exec)</label>
+          <input type="url" id="inputGasUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="text-[11px] text-slate-400 ml-1">PIN Institucional</label>
+          <input type="password" id="inputPin" onkeypress="if(event.key==='Enter') validarAcceso()" placeholder="••••" class="w-full mt-1 text-center tracking-widest bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+        </div>
+        <p id="errorPin" class="hidden text-xs text-rose-400 text-center bg-rose-500/10 border border-rose-500/30 rounded-lg p-2"></p>
+        <button type="button" onclick="validarAcceso()" id="btnIngresar" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium py-3 rounded-xl transition shadow-lg shadow-indigo-600/25 mt-2">
+          Conectar y Desbloquear
         </button>
       </div>
     </div>
@@ -68,10 +75,10 @@
       </div>
 
       <div class="flex items-center gap-2.5">
-        <span id="estadoSistema" class="text-xs bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Conectado a Gmail
-        </span>
-        <button onclick="escanearBandejaReal()" id="btnSincronizar" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-600/20">
+        <button type="button" onclick="cerrarSesion()" title="Cambiar URL o PIN" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl transition">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+        <button type="button" onclick="escanearBandejaReal()" id="btnSincronizar" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-600/20">
           <i class="fa-solid fa-rotate"></i> Analizar Correos Nuevos
         </button>
       </div>
@@ -166,13 +173,13 @@
           </div>
 
           <div class="flex items-center gap-2 pt-1">
-            <button onclick="leerBriefing()" id="btnHablar" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md">
+            <button type="button" onclick="leerBriefing()" id="btnHablar" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md">
               <i class="fa-solid fa-volume-high"></i> Escuchar Briefing
             </button>
-            <button onclick="detenerVoz()" id="btnCallar" class="hidden bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+            <button type="button" onclick="detenerVoz()" id="btnCallar" class="hidden bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
               <i class="fa-solid fa-stop"></i> Detener
             </button>
-            <button onclick="activarMicrofono()" id="btnMic" title="Hablar con Clara" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-3 py-2 rounded-xl transition">
+            <button type="button" onclick="activarMicrofono()" id="btnMic" title="Hablar con Clara" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-3 py-2 rounded-xl transition">
               <i class="fa-solid fa-microphone"></i>
             </button>
           </div>
@@ -196,23 +203,23 @@
           <!-- Comandos Rápidos y Buscador -->
           <div class="space-y-2.5">
             <div class="flex flex-wrap gap-2">
-              <button onclick="consultarClara('todos')" class="text-xs bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-200 border border-indigo-500/40 px-3 py-1.5 rounded-lg transition">
+              <button type="button" onclick="consultarClara('todos')" class="text-xs bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-200 border border-indigo-500/40 px-3 py-1.5 rounded-lg transition">
                 Todos (<span id="countTodos">0</span>)
               </button>
-              <button onclick="consultarClara('urgentes')" class="text-xs bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg transition">
+              <button type="button" onclick="consultarClara('urgentes')" class="text-xs bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg transition">
                 <i class="fa-solid fa-circle-exclamation mr-1"></i> Urgentes (<span id="countUrgentes">0</span>)
               </button>
-              <button onclick="consultarClara('borradores')" class="text-xs bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg transition">
+              <button type="button" onclick="consultarClara('borradores')" class="text-xs bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg transition">
                 <i class="fa-solid fa-file-pen mr-1"></i> Borradores (<span id="countBorradores">0</span>)
               </button>
-              <button onclick="consultarClara('agenda')" class="text-xs bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 px-3 py-1.5 rounded-lg transition">
+              <button type="button" onclick="consultarClara('agenda')" class="text-xs bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 px-3 py-1.5 rounded-lg transition">
                 <i class="fa-regular fa-calendar-check mr-1"></i> Con Fechas (<span id="countFechas">0</span>)
               </button>
             </div>
 
             <div class="flex gap-2">
               <input type="text" id="inputOrdenClara" onkeypress="if(event.key==='Enter') enviarOrdenTexto()" placeholder="Pídele algo a Clara o busca por remitente/tema (ej: 'Apoderados', 'UTP', 'Normativa')..." class="flex-1 bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
-              <button onclick="enviarOrdenTexto()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition">
+              <button type="button" onclick="enviarOrdenTexto()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2.5 rounded-xl transition">
                 <i class="fa-solid fa-paper-plane"></i>
               </button>
             </div>
@@ -249,10 +256,10 @@
           <span id="contadorVista" class="text-xs font-normal text-slate-400"></span>
         </h3>
         <div class="flex flex-wrap gap-1.5">
-          <button onclick="filtrarPorTema('Apoderados')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg">Apoderados</button>
-          <button onclick="filtrarPorTema('Dirección / UTP')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg">Dirección / UTP</button>
-          <button onclick="filtrarPorTema('Normativa / Mineduc')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg">Normativa</button>
-          <button onclick="filtrarPorTema('Administrativo')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg">Administrativo</button>
+          <button type="button" onclick="filtrarPorTema('Apoderados')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg">Apoderados</button>
+          <button type="button" onclick="filtrarPorTema('Dirección / UTP')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg">Dirección / UTP</button>
+          <button type="button" onclick="filtrarPorTema('Normativa / Mineduc')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg">Normativa</button>
+          <button type="button" onclick="filtrarPorTema('Administrativo')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg">Administrativo</button>
         </div>
       </div>
 
@@ -269,7 +276,7 @@
           <i class="fa-solid fa-pen-nib"></i>
           <h3 class="font-semibold text-sm text-white">Borrador Preparado por Clara</h3>
         </div>
-        <button onclick="cerrarModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" onclick="cerrarModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-1.5 text-xs">
         <p class="text-slate-400">Para: <span id="modalPara" class="text-slate-200 font-medium"></span></p>
@@ -277,8 +284,8 @@
       </div>
       <textarea id="modalTexto" rows="7" class="w-full bg-slate-900/95 border border-slate-700 rounded-xl p-3.5 text-xs text-slate-200 leading-relaxed focus:outline-none focus:border-indigo-500"></textarea>
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="cerrarModal()" class="px-4 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-800">Cancelar</button>
-        <button onclick="despacharRespuestaReal()" id="btnEnviarRespuesta" class="px-4 py-2 rounded-xl text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center gap-1.5 shadow-lg">
+        <button type="button" onclick="cerrarModal()" class="px-4 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-800">Cancelar</button>
+        <button type="button" onclick="despacharRespuestaReal()" id="btnEnviarRespuesta" class="px-4 py-2 rounded-xl text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center gap-1.5 shadow-lg">
           <i class="fa-solid fa-paper-plane"></i> Enviar Correo Ahora
         </button>
       </div>
@@ -292,82 +299,134 @@
     let hiloSeleccionadoId = null;
     let intervaloBoca = null;
 
-    // 1. VALIDACIÓN DE PIN CONTRA CÓDIGO.GS
-    function validarAcceso() {
-      const pin = document.getElementById('inputPin').value;
+    // Cliente API blindado contra redirecciones 302 y respuestas HTML de Google Apps Script
+    async function llamarApiGas(payloadObj) {
+      const gasUrl = (localStorage.getItem('clara_gas_url') || '').trim();
+      const pin = (localStorage.getItem('clara_pin') || '').trim();
+      if (!gasUrl || !pin) throw new Error('Falta configurar la URL o el PIN.');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+      try {
+        const res = await fetch(gasUrl, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ ...payloadObj, pin: pin }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        const textoCrudo = await res.text();
+        let json;
+        try {
+          json = JSON.parse(textoCrudo);
+        } catch (e) {
+          throw new Error('El servidor respondió HTML en vez de JSON. Verifica en Apps Script que la implementación tenga acceso para "Cualquier usuario".');
+        }
+
+        if (!json.ok) {
+          throw new Error(json.error || 'Error o PIN incorrecto en el servidor.');
+        }
+        return json;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          throw new Error('Tiempo de espera agotado (20s). Verifica tu conexión o la URL /exec.');
+        }
+        throw err;
+      }
+    }
+
+    // 1. VALIDACIÓN Y PERSISTENCIA EN LOCALSTORAGE
+    async function validarAcceso() {
+      const url = document.getElementById('inputGasUrl').value.trim();
+      const pin = document.getElementById('inputPin').value.trim();
+      const errorEl = document.getElementById('errorPin');
       const btn = document.getElementById('btnIngresar');
+
+      if (!url || !pin) {
+        errorEl.innerText = 'Ingresa la URL del script y tu PIN.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      if (!url.startsWith('https://script.google.com/')) {
+        errorEl.innerText = 'La URL debe comenzar con https://script.google.com/...';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      errorEl.classList.add('hidden');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando...';
 
-      google.script.run
-        .withSuccessHandler(valido => {
-          btn.disabled = false;
-          btn.innerHTML = 'Desbloquear Secretaría IA';
-          if (valido) {
-            sessionStorage.setItem('clara_auth', 'ok');
-            document.getElementById('pantallaPin').classList.add('hidden');
-            document.getElementById('appPrincipal').classList.remove('hidden');
-            cargarDatosDesdeBackend();
-          } else {
-            document.getElementById('errorPin').classList.remove('hidden');
-          }
-        })
-        .withFailureHandler(err => {
-          btn.disabled = false;
-          btn.innerHTML = 'Desbloquear Secretaría IA';
-          alert('Error de conexión: ' + err.message);
-        })
-        .verificarPin(pin);
+      localStorage.setItem('clara_gas_url', url);
+      localStorage.setItem('clara_pin', pin);
+
+      try {
+        await llamarApiGas({ accion: 'login' });
+        document.getElementById('pantallaPin').classList.add('hidden');
+        document.getElementById('appPrincipal').classList.remove('hidden');
+        await cargarDatosDesdeBackend();
+      } catch (err) {
+        localStorage.removeItem('clara_pin');
+        errorEl.innerText = err.message;
+        errorEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Conectar y Desbloquear';
+      }
     }
 
-    // 2. CARGA INICIAL DE DATOS REALES DESDE GOOGLE SHEETS
-    function cargarDatosDesdeBackend() {
+    function cerrarSesion() {
+      localStorage.removeItem('clara_pin');
+      location.reload();
+    }
+
+    // 2. CARGA DE DATOS DESDE GOOGLE SHEETS
+    async function cargarDatosDesdeBackend() {
       document.getElementById('fechaActualTexto').innerText = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
-      
-      google.script.run
-        .withSuccessHandler(data => {
-          correosGlobales = data.correos || [];
-          document.getElementById('textoDialogoClara').innerText = `"${data.briefing}"`;
+      try {
+        const res = await llamarApiGas({ accion: 'obtenerDatos' });
+        const data = res.data;
+        correosGlobales = data.correos || [];
+        document.getElementById('textoDialogoClara').innerText = `"${data.briefing}"`;
 
-          // Actualizar contadores rápidos
-          document.getElementById('countTodos').innerText = correosGlobales.length;
-          document.getElementById('countUrgentes').innerText = correosGlobales.filter(c => c.prioridad === 'Urgente').length;
-          document.getElementById('countBorradores').innerText = correosGlobales.filter(c => c.tieneBorrador).length;
-          document.getElementById('countFechas').innerText = correosGlobales.filter(c => c.fechaDetectada).length;
+        document.getElementById('countTodos').innerText = correosGlobales.length;
+        document.getElementById('countUrgentes').innerText = correosGlobales.filter(c => c.prioridad === 'Urgente').length;
+        document.getElementById('countBorradores').innerText = correosGlobales.filter(c => c.tieneBorrador).length;
+        document.getElementById('countFechas').innerText = correosGlobales.filter(c => c.fechaDetectada).length;
 
-          renderizarTarjetas(correosGlobales);
-          renderizarGraficos(data.conteoTemas, data.gestionPorTema);
-        })
-        .withFailureHandler(err => {
-          document.getElementById('textoDialogoClara').innerText = 'Error al cargar datos desde Google Sheets: ' + err.message;
-        })
-        .obtenerDatosDashboard();
+        renderizarTarjetas(correosGlobales);
+        renderizarGraficos(data.conteoTemas, data.gestionPorTema);
+      } catch (err) {
+        document.getElementById('textoDialogoClara').innerText = 'Error al cargar datos: ' + err.message;
+      }
     }
 
-    // 3. SINCRONIZACIÓN MANUAL CON GMAIL + GEMINI
-    function escanearBandejaReal() {
+    // 3. SINCRONIZACIÓN CON GMAIL + GEMINI
+    async function escanearBandejaReal() {
       const btn = document.getElementById('btnSincronizar');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analizando Gmail...';
       document.getElementById('subtituloAvatar').innerText = 'Leyendo nuevos correos con IA...';
 
-      google.script.run
-        .withSuccessHandler(res => {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Analizar Correos Nuevos';
-          document.getElementById('subtituloAvatar').innerText = res.mensaje;
-          hablar(res.mensaje);
-          cargarDatosDesdeBackend();
-        })
-        .withFailureHandler(err => {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Analizar Correos Nuevos';
-          alert('Error al analizar bandeja: ' + err.message);
-        })
-        .analizarBandejaNueva();
+      try {
+        const res = await llamarApiGas({ accion: 'analizar' });
+        document.getElementById('subtituloAvatar').innerText = res.mensaje;
+        hablar(res.mensaje);
+        await cargarDatosDesdeBackend();
+      } catch (err) {
+        alert('Error al analizar bandeja: ' + err.message);
+        document.getElementById('subtituloAvatar').innerText = 'Error en sincronización';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Analizar Correos Nuevos';
+      }
     }
 
-    // 4. RENDERIZADO DE GRÁFICOS (CHART.JS)
     function renderizarGraficos(conteoTemas, gestionPorTema) {
       const labels = ['Apoderados', 'Dirección / UTP', 'Normativa / Mineduc', 'Administrativo'];
       const dataDona = labels.map(l => (conteoTemas && conteoTemas[l]) || 0);
@@ -412,7 +471,6 @@
       });
     }
 
-    // 5. RENDERIZADO DE TARJETAS DE CORREOS
     function renderizarTarjetas(lista) {
       const grid = document.getElementById('gridCorreos');
       document.getElementById('contadorVista').innerText = `(Mostrando ${lista.length})`;
@@ -423,18 +481,18 @@
         return;
       }
 
-      lista.forEach((c, idx) => {
+      lista.forEach((c) => {
         const badge = c.prioridad === 'Urgente' ? 'badge-urgente' : (c.prioridad === 'Requiere Acción' ? 'badge-accion' : 'badge-info');
         
         const btnBorrador = c.tieneBorrador
-          ? `<button onclick="abrirModalBorrador('${c.id}')" class="text-[11px] bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+          ? `<button type="button" onclick="abrirModalBorrador('${c.id}')" class="text-[11px] bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
                <i class="fa-solid fa-file-signature"></i> Borrador
              </button>`
           : '';
 
         const btnCalendar = c.fechaDetectada
-          ? `<button onclick="crearEventoCalendar('${c.id}')" class="text-[11px] bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
-               <i class="fa-regular fa-calendar-plus"></i> ${c.fechaDetectada}
+          ? `<button type="button" onclick="crearEventoCalendar('${c.id}')" class="text-[11px] bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+               <i class="fa-regular fa-calendar-plus"></i> ${escaparHtml(c.fechaDetectada)}
              </button>`
           : '';
 
@@ -442,8 +500,8 @@
           <div class="glass-card rounded-2xl p-4 flex flex-col justify-between space-y-3 hover:border-indigo-500/40 transition">
             <div class="space-y-2">
               <div class="flex justify-between items-center">
-                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${badge}">${c.prioridad}</span>
-                <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${c.fecha}</span>
+                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${badge}">${escaparHtml(c.prioridad)}</span>
+                <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${escaparHtml(c.fecha)}</span>
               </div>
               <div>
                 <h4 class="text-sm font-bold text-white leading-snug">${escaparHtml(c.asunto)}</h4>
@@ -453,11 +511,11 @@
             </div>
 
             <div class="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-800/80">
-              <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-1 rounded-md">${c.tema}</span>
+              <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-1 rounded-md">${escaparHtml(c.tema)}</span>
               <div class="flex flex-wrap items-center gap-1.5">
                 ${btnCalendar}
                 ${btnBorrador}
-                <button onclick="leerCorreoIndividual('${c.id}')" title="Escuchar resumen" class="text-xs bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-lg transition">
+                <button type="button" onclick="leerCorreoIndividual('${c.id}')" title="Escuchar resumen" class="text-xs bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-lg transition">
                   <i class="fa-solid fa-volume-high"></i>
                 </button>
                 <a href="${c.urlGmail}" target="_blank" title="Abrir hilo en Gmail" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg transition">
@@ -470,7 +528,6 @@
       });
     }
 
-    // 6. ACCIONES DE SECRETARIA (MODAL BORRADOR + CALENDAR)
     function abrirModalBorrador(idHilo) {
       const correo = correosGlobales.find(c => c.id === idHilo);
       if (!correo) return;
@@ -488,7 +545,7 @@
       hiloSeleccionadoId = null;
     }
 
-    function despacharRespuestaReal() {
+    async function despacharRespuestaReal() {
       if (!hiloSeleccionadoId) return;
       const texto = document.getElementById('modalTexto').value.trim();
       if (!texto) return;
@@ -497,35 +554,36 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
 
-      google.script.run
-        .withSuccessHandler(res => {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Correo Ahora';
-          cerrarModal();
-          hablar(res.mensaje);
-        })
-        .withFailureHandler(err => {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Correo Ahora';
-          alert('Error al enviar: ' + err.message);
-        })
-        .enviarRespuestaDirecta(hiloSeleccionadoId, texto);
+      try {
+        const res = await llamarApiGas({ accion: 'enviarRespuesta', idHilo: hiloSeleccionadoId, cuerpoFinal: texto });
+        cerrarModal();
+        hablar(res.mensaje);
+      } catch (err) {
+        alert('Error al enviar: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Correo Ahora';
+      }
     }
 
-    function crearEventoCalendar(idHilo) {
+    async function crearEventoCalendar(idHilo) {
       const correo = correosGlobales.find(c => c.id === idHilo);
       if (!correo) return;
 
       hablar('Agendando recordatorio en tu calendario.');
-      google.script.run
-        .withSuccessHandler(res => {
-          hablar(res.mensaje);
-        })
-        .withFailureHandler(err => alert('Error Calendar: ' + err.message))
-        .agendarEnCalendar(correo.asunto, `${correo.remitente}: ${correo.resumen}`, correo.fechaDetectada);
+      try {
+        const res = await llamarApiGas({
+          accion: 'agendarCalendar',
+          titulo: correo.asunto,
+          descripcion: `${correo.remitente}: ${correo.resumen}`,
+          fechaTexto: correo.fechaDetectada
+        });
+        hablar(res.mensaje);
+      } catch (err) {
+        alert('Error Calendar: ' + err.message);
+      }
     }
 
-    // 7. CONSULTAS E INTERACCIÓN CON CLARA
     function consultarClara(tipo) {
       let lista = correosGlobales;
       let respuesta = '';
@@ -585,7 +643,6 @@
       if (c) hablar(`Correo de ${c.remitente}. ${c.resumen}`);
     }
 
-    // 8. ANIMACIONES DEL AVATAR Y VOZ (WEB SPEECH API)
     function iniciarParpadeo() {
       setInterval(() => {
         document.getElementById('ojosAbiertos').style.display = 'none';
@@ -694,7 +751,12 @@
     window.onload = () => {
       iniciarParpadeo();
       if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
-      if (sessionStorage.getItem('clara_auth') === 'ok') {
+
+      const savedUrl = localStorage.getItem('clara_gas_url');
+      const savedPin = localStorage.getItem('clara_pin');
+      if (savedUrl) document.getElementById('inputGasUrl').value = savedUrl;
+
+      if (savedUrl && savedPin) {
         document.getElementById('pantallaPin').classList.add('hidden');
         document.getElementById('appPrincipal').classList.remove('hidden');
         cargarDatosDesdeBackend();
