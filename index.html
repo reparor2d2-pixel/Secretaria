@@ -752,7 +752,8 @@
       iniciarParpadeo();
       if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
 
-      const savedUrl = localStorage.getItem('clara_gas_url');
+      const savedUrl = "https://script.google.com/macros/s/AKfycbyI3foqgMo6dUT8-buwP0LvRfEOVlCdte17kIKpB1HmHNsaggF5Qjv016OAdTu54Xj6cA/exec";
+      localStorage.setItem('clara_gas_url', savedUrl);
       const savedPin = localStorage.getItem('clara_pin');
       if (savedUrl) document.getElementById('inputGasUrl').value = savedUrl;
 
