@@ -43,7 +43,7 @@
         <p class="text-xs text-slate-400 mt-1">Colegio Nuestra Señora de las Mercedes · Coordinación Convivencia Escolar</p>
       </div>
       <div class="space-y-3 text-left">
-        <div>
+        <div id="bloqueUrl">
           <label class="text-[11px] text-slate-400 ml-1">URL del Backend (Google Apps Script /exec)</label>
           <input type="url" id="inputGasUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
         </div>
@@ -75,8 +75,8 @@
       </div>
 
       <div class="flex items-center gap-2.5">
-        <button type="button" onclick="cerrarSesion()" title="Cambiar URL o PIN" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl transition">
-          <i class="fa-solid fa-gear"></i>
+        <button type="button" onclick="cerrarSesion()" title="Bloquear / Cambiar configuración" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl transition">
+          <i class="fa-solid fa-lock"></i>
         </button>
         <button type="button" onclick="escanearBandejaReal()" id="btnSincronizar" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-600/20">
           <i class="fa-solid fa-rotate"></i> Analizar Correos Nuevos
@@ -293,15 +293,17 @@
   </div>
 
   <script>
+    // OPCIONAL: Pega aquí tu URL /exec entre las comillas para no tener que escribirla en otros dispositivos
+    const URL_BACKEND_FIJA = "";
+
     let correosGlobales = [];
     let chartTemasInstance = null;
     let chartEstadosInstance = null;
     let hiloSeleccionadoId = null;
     let intervaloBoca = null;
 
-    // Cliente API blindado contra redirecciones 302 y respuestas HTML de Google Apps Script
     async function llamarApiGas(payloadObj) {
-      const gasUrl = (localStorage.getItem('clara_gas_url') || '').trim();
+      const gasUrl = (URL_BACKEND_FIJA || localStorage.getItem('clara_gas_url') || '').trim();
       const pin = (localStorage.getItem('clara_pin') || '').trim();
       if (!gasUrl || !pin) throw new Error('Falta configurar la URL o el PIN.');
 
@@ -323,7 +325,7 @@
         try {
           json = JSON.parse(textoCrudo);
         } catch (e) {
-          throw new Error('El servidor respondió HTML en vez de JSON. Verifica en Apps Script que la implementación tenga acceso para "Cualquier usuario".');
+          throw new Error('El servidor respondió HTML en vez de JSON. Verifica que Apps Script esté publicado para "Cualquier usuario".');
         }
 
         if (!json.ok) {
@@ -339,21 +341,14 @@
       }
     }
 
-    // 1. VALIDACIÓN Y PERSISTENCIA EN LOCALSTORAGE
     async function validarAcceso() {
-      const url = document.getElementById('inputGasUrl').value.trim();
+      const url = (URL_BACKEND_FIJA || document.getElementById('inputGasUrl').value || '').trim();
       const pin = document.getElementById('inputPin').value.trim();
       const errorEl = document.getElementById('errorPin');
       const btn = document.getElementById('btnIngresar');
 
       if (!url || !pin) {
         errorEl.innerText = 'Ingresa la URL del script y tu PIN.';
-        errorEl.classList.remove('hidden');
-        return;
-      }
-
-      if (!url.startsWith('https://script.google.com/')) {
-        errorEl.innerText = 'La URL debe comenzar con https://script.google.com/...';
         errorEl.classList.remove('hidden');
         return;
       }
@@ -385,7 +380,6 @@
       location.reload();
     }
 
-    // 2. CARGA DE DATOS DESDE GOOGLE SHEETS
     async function cargarDatosDesdeBackend() {
       document.getElementById('fechaActualTexto').innerText = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
       try {
@@ -394,11 +388,7 @@
         correosGlobales = data.correos || [];
         document.getElementById('textoDialogoClara').innerText = `"${data.briefing}"`;
 
-        document.getElementById('countTodos').innerText = correosGlobales.length;
-        document.getElementById('countUrgentes').innerText = correosGlobales.filter(c => c.prioridad === 'Urgente').length;
-        document.getElementById('countBorradores').innerText = correosGlobales.filter(c => c.tieneBorrador).length;
-        document.getElementById('countFechas').innerText = correosGlobales.filter(c => c.fechaDetectada).length;
-
+        actualizarContadoresRapidos();
         renderizarTarjetas(correosGlobales);
         renderizarGraficos(data.conteoTemas, data.gestionPorTema);
       } catch (err) {
@@ -406,7 +396,13 @@
       }
     }
 
-    // 3. SINCRONIZACIÓN CON GMAIL + GEMINI
+    function actualizarContadoresRapidos() {
+      document.getElementById('countTodos').innerText = correosGlobales.length;
+      document.getElementById('countUrgentes').innerText = correosGlobales.filter(c => c.prioridad === 'Urgente').length;
+      document.getElementById('countBorradores').innerText = correosGlobales.filter(c => c.tieneBorrador).length;
+      document.getElementById('countFechas').innerText = correosGlobales.filter(c => c.fechaDetectada).length;
+    }
+
     async function escanearBandejaReal() {
       const btn = document.getElementById('btnSincronizar');
       btn.disabled = true;
@@ -497,7 +493,7 @@
           : '';
 
         grid.innerHTML += `
-          <div class="glass-card rounded-2xl p-4 flex flex-col justify-between space-y-3 hover:border-indigo-500/40 transition">
+          <div id="card-${c.id}" class="glass-card rounded-2xl p-4 flex flex-col justify-between space-y-3 hover:border-indigo-500/40 transition">
             <div class="space-y-2">
               <div class="flex justify-between items-center">
                 <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${badge}">${escaparHtml(c.prioridad)}</span>
@@ -521,11 +517,30 @@
                 <a href="${c.urlGmail}" target="_blank" title="Abrir hilo en Gmail" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg transition">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </a>
+                <button type="button" onclick="descartarTarjeta('${c.id}')" title="Descartar y archivar" class="text-xs bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 px-2.5 py-1 rounded-lg transition">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
               </div>
             </div>
           </div>
         `;
       });
+    }
+
+    async function descartarTarjeta(idHilo) {
+      if (!confirm('¿Quitar este correo del panel y archivarlo en Gmail?')) return;
+      const card = document.getElementById(`card-${idHilo}`);
+      if (card) card.style.opacity = '0.4';
+
+      try {
+        await llamarApiGas({ accion: 'descartarCorreo', idHilo: idHilo, archivarEnGmail: true });
+        correosGlobales = correosGlobales.filter(c => c.id !== idHilo);
+        actualizarContadoresRapidos();
+        renderizarTarjetas(correosGlobales);
+      } catch (err) {
+        if (card) card.style.opacity = '1';
+        alert('Error al descartar: ' + err.message);
+      }
     }
 
     function abrirModalBorrador(idHilo) {
@@ -752,8 +767,12 @@
       iniciarParpadeo();
       if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
 
-      const savedUrl = "https://script.google.com/macros/s/AKfycbyI3foqgMo6dUT8-buwP0LvRfEOVlCdte17kIKpB1HmHNsaggF5Qjv016OAdTu54Xj6cA/exec";
-      localStorage.setItem('clara_gas_url', savedUrl);
+      if (URL_BACKEND_FIJA) {
+        localStorage.setItem('clara_gas_url', URL_BACKEND_FIJA);
+        document.getElementById('bloqueUrl').classList.add('hidden');
+      }
+
+      const savedUrl = URL_BACKEND_FIJA || localStorage.getItem('clara_gas_url');
       const savedPin = localStorage.getItem('clara_pin');
       if (savedUrl) document.getElementById('inputGasUrl').value = savedUrl;
 
